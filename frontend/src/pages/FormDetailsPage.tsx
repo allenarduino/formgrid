@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { useForms } from '../hooks/useForms';
 import { useAuth } from '../context/AuthContext';
-import { useSubmissions } from '../hooks/useSubmissions';
+import { useSubmissions, Submission } from '../hooks/useSubmissions';
 import api from '../lib/api';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/cjs/styles/prism';
@@ -79,6 +79,8 @@ export function FormDetailsPage() {
     const [newEmail, setNewEmail] = useState('');
     const [redirectUrl, setRedirectUrl] = useState('');
     const [copiedStates, setCopiedStates] = useState<{ [key: string]: boolean }>({});
+    const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     // Spam protection state management
     // This tracks the security settings that will be saved to the backend
     // enabled: Master toggle for all spam protection (CAPTCHA, honeypot, rate limiting)
@@ -427,6 +429,17 @@ export function FormDetailsPage() {
             isActive: form?.isActive || true,
         });
         setHasChanges(false);
+    };
+
+    // Modal handling functions
+    const handleViewSubmission = (submission: Submission) => {
+        setSelectedSubmission(submission);
+        setIsModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setSelectedSubmission(null);
+        setIsModalOpen(false);
     };
 
 
@@ -843,12 +856,20 @@ form.addEventListener('submit', async (e) => {
 
                                                 {/* Actions Cell */}
                                                 <td className="px-6 py-4 text-sm text-gray-900">
-                                                    <button
-                                                        onClick={() => handleDeleteSubmission(submission.id)}
-                                                        className="text-red-600 hover:text-red-800 font-medium transition-colors"
-                                                    >
-                                                        Delete
-                                                    </button>
+                                                    <div className="flex items-center space-x-3">
+                                                        <button
+                                                            onClick={() => handleViewSubmission(submission)}
+                                                            className="text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                                                        >
+                                                            View
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeleteSubmission(submission.id)}
+                                                            className="text-red-600 hover:text-red-800 font-medium transition-colors"
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}
@@ -1258,6 +1279,124 @@ form.addEventListener('submit', async (e) => {
 
                 {/* Tab Content */}
                 {renderTabContent()}
+
+                {/* Submission Details Modal */}
+                {isModalOpen && selectedSubmission && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                        <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+                            {/* Modal Header */}
+                            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                                <h3 className="text-lg font-medium text-gray-900">Submission Details</h3>
+                                <button
+                                    onClick={handleCloseModal}
+                                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                                >
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            {/* Modal Content */}
+                            <div className="px-6 py-4 overflow-y-auto max-h-[calc(90vh-120px)]">
+                                <div className="space-y-6">
+                                    {/* Submission Info */}
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-500 mb-1">Submission ID</label>
+                                            <p className="text-sm text-gray-900 font-mono">{selectedSubmission.id}</p>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-500 mb-1">Status</label>
+                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(selectedSubmission.status)}`}>
+                                                {selectedSubmission.status.charAt(0).toUpperCase() + selectedSubmission.status.slice(1)}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-500 mb-1">Submitted</label>
+                                            <p className="text-sm text-gray-900">{formatSubmissionDate(selectedSubmission.createdAt)}</p>
+                                        </div>
+                                    </div>
+
+                                    {/* Form Data */}
+                                    <div>
+                                        <h4 className="text-md font-medium text-gray-900 mb-3">Form Data</h4>
+                                        <div className="bg-gray-50 rounded-lg p-4">
+                                            <div className="grid grid-cols-1 gap-3">
+                                                {Object.entries(selectedSubmission.payload).map(([key, value]) => (
+                                                    <div key={key} className="flex flex-col sm:flex-row sm:items-center">
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-0 sm:w-1/3 sm:pr-4">
+                                                            {formatFieldName(key)}
+                                                        </label>
+                                                        <div className="flex-1">
+                                                            {typeof value === 'string' && value.length > 100 ? (
+                                                                <div className="bg-white rounded border p-3">
+                                                                    <p className="text-sm text-gray-900 whitespace-pre-wrap">{value}</p>
+                                                                </div>
+                                                            ) : (
+                                                                <p className="text-sm text-gray-900">{String(value)}</p>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Raw JSON (Optional) */}
+                                    <div>
+                                        <h4 className="text-md font-medium text-gray-900 mb-3">Raw Data</h4>
+                                        <div className="bg-gray-900 rounded-lg overflow-hidden">
+                                            <SyntaxHighlighter
+                                                language="json"
+                                                style={tomorrow}
+                                                customStyle={{
+                                                    margin: 0,
+                                                    fontSize: '0.875rem',
+                                                    padding: '1rem'
+                                                }}
+                                            >
+                                                {JSON.stringify(selectedSubmission.payload, null, 2)}
+                                            </SyntaxHighlighter>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Modal Footer */}
+                            <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                                <div className="flex items-center space-x-3">
+                                    <button
+                                        onClick={() => {
+                                            if (selectedSubmission.status === 'new') {
+                                                // Mark as read logic here
+                                                console.log('Mark as read:', selectedSubmission.id);
+                                            }
+                                        }}
+                                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+                                    >
+                                        Mark as Read
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            // Mark as responded logic here
+                                            console.log('Mark as responded:', selectedSubmission.id);
+                                        }}
+                                        className="px-4 py-2 text-sm font-medium text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-md transition-colors"
+                                    >
+                                        Mark as Responded
+                                    </button>
+                                </div>
+                                <button
+                                    onClick={handleCloseModal}
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </DashboardLayout>
     );
