@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface Form {
     id: string;
@@ -16,6 +17,7 @@ interface RecentFormsTableProps {
 }
 
 export function RecentFormsTable({ forms, isLoading }: RecentFormsTableProps) {
+    const navigate = useNavigate();
     if (isLoading) {
         return (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200">
@@ -61,7 +63,11 @@ export function RecentFormsTable({ forms, isLoading }: RecentFormsTableProps) {
                 ) : (
                     <div className="divide-y divide-gray-200">
                         {forms.map((form) => (
-                            <div key={form.id} className="px-6 py-4 hover:bg-gray-50 transition-colors duration-150">
+                            <div
+                                key={form.id}
+                                className="px-6 py-4 hover:bg-gray-50 transition-colors duration-150 cursor-pointer"
+                                onClick={() => navigate(`/dashboard/forms/${form.id}`)}
+                            >
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center space-x-4">
                                         <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center">
@@ -88,7 +94,11 @@ export function RecentFormsTable({ forms, isLoading }: RecentFormsTableProps) {
                                                 }`}>
                                                 {form.isActive ? 'Active' : 'Paused'}
                                             </span>
-                                            <button className="p-1 text-gray-400 hover:text-gray-600">
+                                            <button
+                                                className="p-1 text-gray-400 hover:text-gray-600"
+                                                onClick={(e) => e.stopPropagation()}
+                                                title="More options"
+                                            >
                                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
                                                 </svg>
