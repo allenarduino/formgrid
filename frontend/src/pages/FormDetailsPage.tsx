@@ -5,6 +5,8 @@ import { useForms } from '../hooks/useForms';
 import { useAuth } from '../context/AuthContext';
 import { useSubmissions } from '../hooks/useSubmissions';
 import api from '../lib/api';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { tomorrow } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 
 interface ApiForm {
     id: string;
@@ -525,15 +527,23 @@ export function FormDetailsPage() {
                 <h3 className="text-lg font-medium text-gray-900 mb-4">How to use</h3>
                 <div className="bg-white shadow-sm rounded-lg border border-gray-200 p-6">
                     <h3 className="text-lg font-medium text-gray-900 mb-4">HTML Form Snippet</h3>
-                    <div className="bg-gray-900 rounded-lg p-4 overflow-x-auto">
-                        <pre className="text-green-400 text-sm">
+                    <div className="rounded-lg overflow-hidden">
+                        <SyntaxHighlighter
+                            language="html"
+                            style={tomorrow}
+                            customStyle={{
+                                margin: 0,
+                                borderRadius: '0.5rem',
+                                fontSize: '0.875rem'
+                            }}
+                        >
                             {`<form action="${generateEndpointUrl(form.endpointSlug)}" method="POST">
     <input type="text" name="name" placeholder="Your Name" required>
     <input type="email" name="email" placeholder="Your Email" required>
     <textarea name="message" placeholder="Your Message" required></textarea>
     <button type="submit">Send Message</button>
 </form>`}
-                        </pre>
+                        </SyntaxHighlighter>
                     </div>
                     <button
                         onClick={() => handleCopy(`<form action="${generateEndpointUrl(form.endpointSlug)}" method="POST">
@@ -551,8 +561,16 @@ export function FormDetailsPage() {
                 {/* JavaScript Snippet */}
                 <div className="bg-white shadow-sm rounded-lg border border-gray-200 p-6">
                     <h3 className="text-lg font-medium text-gray-900 mb-4">JavaScript (Async Submission)</h3>
-                    <div className="bg-gray-900 rounded-lg p-4 overflow-x-auto">
-                        <pre className="text-blue-400 text-sm">
+                    <div className="rounded-lg overflow-hidden">
+                        <SyntaxHighlighter
+                            language="javascript"
+                            style={tomorrow}
+                            customStyle={{
+                                margin: 0,
+                                borderRadius: '0.5rem',
+                                fontSize: '0.875rem'
+                            }}
+                        >
                             {`const form = document.getElementById('myForm');
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -572,7 +590,7 @@ form.addEventListener('submit', async (e) => {
         alert('Error submitting form');
     }
 });`}
-                        </pre>
+                        </SyntaxHighlighter>
                     </div>
                     <button
                         onClick={() => handleCopy(`const form = document.getElementById('myForm');
