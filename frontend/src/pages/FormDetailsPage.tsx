@@ -814,7 +814,24 @@ form.addEventListener('submit', async (e) => {
 
         // Get from formData/payload - all fields are stored here now
         if (submission.payload && submission.payload[fieldName] !== undefined) {
-            return submission.payload[fieldName];
+            const value = submission.payload[fieldName];
+
+            // Handle file upload fields (array of file objects)
+            if (Array.isArray(value) && value.length > 0 && value[0]?.filename) {
+                return `${value.length} file${value.length > 1 ? 's' : ''} uploaded`;
+            }
+
+            // Handle single file object
+            if (value && typeof value === 'object' && value.filename) {
+                return '1 file uploaded';
+            }
+
+            // Handle long text content
+            if (typeof value === 'string' && value.length > 50) {
+                return value.substring(0, 50) + '...';
+            }
+
+            return value;
         }
 
         return 'N/A';
