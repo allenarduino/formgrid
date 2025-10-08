@@ -807,23 +807,54 @@ form.addEventListener('submit', async (e) => {
         return Array.from(fieldNames).sort();
     };
 
+    // Function to check if a field contains files
+    const isFileField = (value: any) => {
+        return (Array.isArray(value) && value.length > 0 && value[0]?.filename) ||
+            (value && typeof value === 'object' && value.filename);
+    };
+
+    // Function to get files from a field value
+    const getFilesFromField = (value: any) => {
+        if (Array.isArray(value) && value.length > 0 && value[0]?.filename) {
+            return value;
+        }
+        if (value && typeof value === 'object' && value.filename) {
+            return [value];
+        }
+        return [];
+    };
+
     // Function to get field value from submission
     const getFieldValue = (submission: any, fieldName: string) => {
         if (fieldName === 'submitted') return formatSubmissionDate(submission.createdAt);
         if (fieldName === 'status') return submission.status;
 
+        // Handle additional file columns (e.g., attachment_2, attachment_3)
+        if (fieldName.includes('_2') || fieldName.includes('_3')) {
+            const baseFieldName = fieldName.replace(/_\d+$/, '');
+            if (submission.payload && submission.payload[baseFieldName] !== undefined) {
+                const value = submission.payload[baseFieldName];
+                if (isFileField(value)) {
+                    const files = getFilesFromField(value);
+                    const fileIndex = parseInt(fieldName.split('_').pop() || '1') - 1;
+                    if (files[fileIndex]) {
+                        return files[fileIndex].originalName || files[fileIndex].filename;
+                    }
+                }
+            }
+            return '';
+        }
+
         // Get from formData/payload - all fields are stored here now
         if (submission.payload && submission.payload[fieldName] !== undefined) {
             const value = submission.payload[fieldName];
 
-            // Handle file upload fields (array of file objects)
-            if (Array.isArray(value) && value.length > 0 && value[0]?.filename) {
-                return `${value.length} file${value.length > 1 ? 's' : ''} uploaded`;
-            }
-
-            // Handle single file object
-            if (value && typeof value === 'object' && value.filename) {
-                return '1 file uploaded';
+            // Handle file upload fields - show first file name only
+            if (isFileField(value)) {
+                const files = getFilesFromField(value);
+                if (files.length > 0) {
+                    return files[0].originalName || files[0].filename;
+                }
             }
 
             // Handle long text content
@@ -842,6 +873,17 @@ form.addEventListener('submit', async (e) => {
         if (fieldName === 'submitted') return 'Submitted';
         if (fieldName === 'status') return 'Status';
 
+        // Handle additional file columns
+        if (fieldName.includes('_2') || fieldName.includes('_3')) {
+            const baseFieldName = fieldName.replace(/_\d+$/, '');
+            const fileNumber = fieldName.split('_').pop();
+            const formattedBase = baseFieldName
+                .replace(/([A-Z])/g, ' $1')
+                .replace(/^./, str => str.toUpperCase())
+                .trim();
+            return `${formattedBase} (File ${fileNumber})`;
+        }
+
         return fieldName
             .replace(/([A-Z])/g, ' $1') // Add space before capital letters
             .replace(/^./, str => str.toUpperCase()) // Capitalize first letter
@@ -852,9 +894,39 @@ form.addEventListener('submit', async (e) => {
         // Get all unique field names from submissions
         const allFieldNames = submissionsData ? getAllFieldNames(submissionsData.submissions) : [];
 
-        // Define the order of columns (all dynamic fields, then system fields)
+        // Create additional columns for file fields with multiple files
+        const getFileColumns = () => {
+            if (!submissionsData) return [];
+
+            const fileColumns: string[] = [];
+
+            // Check each submission for file fields with multiple files
+            submissionsData.submissions.forEach(submission => {
+                if (submission.payload) {
+                    Object.entries(submission.payload).forEach(([fieldName, value]) => {
+                        if (isFileField(value)) {
+                            const files = getFilesFromField(value);
+                            // If there are multiple files, create additional columns
+                            if (files.length > 1 && !fileColumns.includes(`${fieldName}_2`)) {
+                                fileColumns.push(`${fieldName}_2`);
+                            }
+                            if (files.length > 2 && !fileColumns.includes(`${fieldName}_3`)) {
+                                fileColumns.push(`${fieldName}_3`);
+                            }
+                        }
+                    });
+                }
+            });
+
+            return fileColumns;
+        };
+
+        const fileColumns = getFileColumns();
+
+        // Define the order of columns (all dynamic fields, additional file columns, then system fields)
         const columnOrder = [
             ...allFieldNames, // All form fields dynamically
+            ...fileColumns, // Additional file columns
             'submitted',
             'status'
         ];
@@ -1495,7 +1567,58 @@ form.addEventListener('submit', async (e) => {
                                                             {formatFieldName(key)}
                                                         </label>
                                                         <div className="flex-1">
-                                                            {typeof value === 'string' && value.length > 100 ? (
+                                                            {/* Check if this is a file upload field */}
+                                                            {isFileField(value) ? (
+                                                                <div className="space-y-2">
+                                                                    {getFilesFromField(value).map((file: any, index: number) => (
+                                                                        <div key={index} className="flex items-center justify-between bg-gray-50 rounded-lg p-3 border">
+                                                                            <div className="flex items-center space-x-3">
+                                                                                <div className="flex-shrink-0">
+                                                                                    {file.mimetype?.startsWith('image/') ? (
+                                                                                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                                                                            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                                                            </svg>
+                                                                                        </div>
+                                                                                    ) : (
+                                                                                        <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                                                                                            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                                                            </svg>
+                                                                                        </div>
+                                                                                    )}
+                                                                                </div>
+                                                                                <div className="flex-1 min-w-0">
+                                                                                    <p className="text-sm font-medium text-gray-900 truncate">{file.originalName}</p>
+                                                                                    <p className="text-xs text-gray-500">
+                                                                                        {(file.size / 1024).toFixed(1)} KB • {file.mimetype}
+                                                                                    </p>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div className="flex items-center space-x-2">
+                                                                                <a
+                                                                                    href={`http://localhost:4001${file.url}`}
+                                                                                    target="_blank"
+                                                                                    rel="noopener noreferrer"
+                                                                                    className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                                                                                >
+                                                                                    Download
+                                                                                </a>
+                                                                                {file.mimetype?.startsWith('image/') && (
+                                                                                    <a
+                                                                                        href={`http://localhost:4001${file.url}`}
+                                                                                        target="_blank"
+                                                                                        rel="noopener noreferrer"
+                                                                                        className="text-gray-600 hover:text-gray-800 text-sm font-medium"
+                                                                                    >
+                                                                                        View
+                                                                                    </a>
+                                                                                )}
+                                                                            </div>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            ) : typeof value === 'string' && value.length > 100 ? (
                                                                 <div className="bg-white rounded border p-3">
                                                                     <p className="text-sm text-gray-900 whitespace-pre-wrap">{value}</p>
                                                                 </div>
