@@ -3,6 +3,7 @@ import { SubmissionController } from './submission.controller';
 import { authMiddleware } from '../presentation/middleware/auth';
 import { formSubmissionRateLimit, apiRateLimit } from '../middleware/rateLimit';
 import { rateLimiters } from '../middleware/enhancedRateLimit';
+import { handleFileUpload } from '../middleware/fileUpload';
 
 /**
  * Submission routes
@@ -28,6 +29,7 @@ export function createSubmissionRoutes(submissionController?: SubmissionControll
     router.post('/f/:endpointSlug',
         formSubmissionRateLimit,
         rateLimiters.formSpecific.middleware(),
+        handleFileUpload,
         submitToForm
     );
 
@@ -35,6 +37,7 @@ export function createSubmissionRoutes(submissionController?: SubmissionControll
     router.post('/api/f/:endpointSlug',
         formSubmissionRateLimit,
         rateLimiters.formSpecific.middleware(),
+        handleFileUpload,
         submitToForm
     );
 
@@ -42,6 +45,7 @@ export function createSubmissionRoutes(submissionController?: SubmissionControll
     router.post('/forms/:endpointSlug/submit',
         formSubmissionRateLimit,
         rateLimiters.formSpecific.middleware(),
+        handleFileUpload,
         submitToForm
     );
 

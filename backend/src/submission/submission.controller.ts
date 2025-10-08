@@ -3,6 +3,7 @@ import { SubmissionService } from './submission.service';
 import { SubmissionRepository } from './submission.repository';
 import { FormRepository } from '../form/form.repository';
 import { createSubmissionSchema, submissionQuerySchema } from './submission.validation';
+import { getFileUrl } from '../middleware/fileUpload';
 
 /**
  * Submission controller for handling HTTP requests
@@ -49,8 +50,29 @@ export class SubmissionController {
             if (isHtmlForm) {
                 // For HTML forms, store ALL fields dynamically in formData
                 const { honeypot, 'g-recaptcha-response': recaptchaResponse, ...allFormFields } = req.body;
+
+                // Handle file uploads if any
+                const files = req.files as Express.Multer.File[];
+                const fileData: { [key: string]: any } = {};
+
+                if (files && files.length > 0) {
+                    files.forEach(file => {
+                        const fieldName = file.fieldname;
+                        if (!fileData[fieldName]) {
+                            fileData[fieldName] = [];
+                        }
+                        fileData[fieldName].push({
+                            filename: file.filename,
+                            originalName: file.originalname,
+                            mimetype: file.mimetype,
+                            size: file.size,
+                            url: getFileUrl(file.filename)
+                        });
+                    });
+                }
+
                 submissionData = {
-                    formData: allFormFields, // Store ALL fields dynamically
+                    formData: { ...allFormFields, ...fileData }, // Store ALL fields and files dynamically
                     honeypot,
                     'g-recaptcha-response': recaptchaResponse
                 };

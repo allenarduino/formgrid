@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import passport from 'passport';
 import { config } from 'dotenv';
+import path from 'path';
 import { createAuthRoutes } from './auth';
 import { createUserRoutes } from './user';
 import { createFormRoutes } from './form';
@@ -74,6 +75,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // Initialize Passport middleware
 app.use(passport.initialize());
+
+// Serve uploaded files
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Health check route
 app.get('/health', (req: Request, res: Response) => {

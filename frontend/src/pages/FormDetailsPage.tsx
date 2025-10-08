@@ -677,7 +677,113 @@ form.addEventListener('submit', async (e) => {
                 </div>
             </div>
 
+            {/* File Upload Section */}
+            <div className="bg-white shadow-sm rounded-lg border border-gray-200 p-6">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">With File Upload</h3>
+                <p className="text-sm text-gray-600 mb-6">
+                    Use these code snippets if you want to include file upload functionality in your form.
+                </p>
 
+                {/* HTML Form with File Upload */}
+                <div className="mb-8">
+                    <h4 className="text-md font-medium text-gray-800 mb-3">HTML Form (with file upload)</h4>
+                    <div className="rounded-lg overflow-hidden">
+                        <SyntaxHighlighter
+                            language="html"
+                            style={tomorrow}
+                            customStyle={{
+                                margin: 0,
+                                borderRadius: '0.5rem',
+                                fontSize: '0.875rem'
+                            }}
+                        >
+                            {`<form action="${generateEndpointUrl(form.endpointSlug)}" method="POST" enctype="multipart/form-data">
+    <input type="text" name="name" placeholder="Your Name" required>
+    <input type="email" name="email" placeholder="Your Email" required>
+    <textarea name="message" placeholder="Your Message" required></textarea>
+    <input type="file" name="attachment" accept="image/*,.pdf">
+    <button type="submit">Send Message</button>
+</form>`}
+                        </SyntaxHighlighter>
+                    </div>
+                    <button
+                        onClick={() => handleCopy(`<form action="${generateEndpointUrl(form.endpointSlug)}" method="POST" enctype="multipart/form-data">
+    <input type="text" name="name" placeholder="Your Name" required>
+    <input type="email" name="email" placeholder="Your Email" required>
+    <textarea name="message" placeholder="Your Message" required></textarea>
+    <input type="file" name="attachment" accept="image/*,.pdf">
+    <button type="submit">Send Message</button>
+</form>`, 'file-upload-html')}
+                        className="mt-4 px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors duration-200"
+                    >
+                        {copiedStates['file-upload-html'] ? 'Copied!' : 'Copy HTML with File Upload'}
+                    </button>
+                </div>
+
+                {/* JavaScript with File Upload */}
+                <div>
+                    <h4 className="text-md font-medium text-gray-800 mb-3">JavaScript (with file upload)</h4>
+                    <div className="rounded-lg overflow-hidden">
+                        <SyntaxHighlighter
+                            language="javascript"
+                            style={tomorrow}
+                            customStyle={{
+                                margin: 0,
+                                borderRadius: '0.5rem',
+                                fontSize: '0.875rem'
+                            }}
+                        >
+                            {`const form = document.getElementById('myForm');
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
+    
+    try {
+        const response = await fetch('${generateEndpointUrl(form.endpointSlug)}', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            alert('Form submitted successfully!');
+            form.reset();
+        } else {
+            alert('Error submitting form');
+        }
+    } catch (error) {
+        alert('Error submitting form');
+    }
+});`}
+                        </SyntaxHighlighter>
+                    </div>
+                    <button
+                        onClick={() => handleCopy(`const form = document.getElementById('myForm');
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
+    
+    try {
+        const response = await fetch('${generateEndpointUrl(form.endpointSlug)}', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            alert('Form submitted successfully!');
+            form.reset();
+        } else {
+            alert('Error submitting form');
+        }
+    } catch (error) {
+        alert('Error submitting form');
+    }
+});`, 'file-upload-js')}
+                        className="mt-4 px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors duration-200"
+                    >
+                        {copiedStates['file-upload-js'] ? 'Copied!' : 'Copy JavaScript with File Upload'}
+                    </button>
+                </div>
+            </div>
 
         </div>
     );
