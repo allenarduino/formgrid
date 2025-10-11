@@ -1,0 +1,79 @@
+# Dependencies
+node_modules
+**/node_modules
+.pnpm-store
+
+# Build outputs
+dist
+**/dist
+build
+**/build
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+**/.env
+**/.env.local
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test coverage
+coverage
+.nyc_output
+**/__tests__
+**/*.test.ts
+**/*.spec.ts
+
+# Database
+*.db
+*.db-journal
+test.db
+
+# Uploads
+uploads
+uploads-dev
+packages/api/uploads
+packages/api/uploads-dev
+
+# Docker
+.docker
+Dockerfile*
+docker-compose*.yml
+
+# Documentation
+*.md
+README*
+CHANGELOG*
+LICENSE
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.travis.yml
+
+# Misc
+*.pid
+*.seed
+*.pid.lock
+.npmrc
+
+

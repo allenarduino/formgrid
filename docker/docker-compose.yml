@@ -57,17 +57,19 @@ services:
   # Backend Service
   backend:
     build:
-      context: ../packages/api
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: packages/api/Dockerfile
+      target: development
     container_name: formgrid-backend
     restart: unless-stopped
     ports:
       - "4001:4000"
     volumes:
-      - ../packages/api:/app
+      - ..:/app
       - /app/node_modules
-      - uploads_data:/app/uploads  # Local file storage
-      - ../uploads:/app/uploads-dev  # Development bind mount (optional)
+      - /app/packages/api/node_modules
+      - uploads_data:/app/packages/api/uploads  # Local file storage
+      - ../uploads:/app/packages/api/uploads-dev  # Development bind mount (optional)
     environment:
       - NODE_ENV=development
       - PORT=4000
@@ -111,37 +113,43 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
-    command: ["npm", "run", "dev"]
+    command: ["pnpm", "run", "dev"]
+    working_dir: /app/packages/api
 
   # Frontend Service
   frontend:
     build:
-      context: ../apps/dashboard
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: apps/dashboard/Dockerfile
+      target: development
     container_name: formgrid-frontend
     restart: unless-stopped
     ports:
       - "5173:5173"
     volumes:
-      - ../apps/dashboard:/app
+      - ..:/app
       - /app/node_modules
+      - /app/apps/dashboard/node_modules
     environment:
       - VITE_API_BASE_URL=http://localhost:4001
     depends_on:
       - backend
-    command: ["npm", "run", "dev", "--", "--host"]
+    command: ["pnpm", "run", "dev", "--", "--host"]
+    working_dir: /app/apps/dashboard
 
   # Queue Worker Service
   queue-worker:
     build:
-      context: ../packages/api
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: packages/api/Dockerfile
+      target: development
     container_name: formgrid-queue-worker
     restart: unless-stopped
     volumes:
-      - ../packages/api:/app
+      - ..:/app
       - /app/node_modules
-      - uploads_data:/app/uploads
+      - /app/packages/api/node_modules
+      - uploads_data:/app/packages/api/uploads
     environment:
       - NODE_ENV=development
       - DATABASE_URL=mysql://app_user:app_password@db:3306/formgrid
@@ -161,17 +169,19 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: ["npm", "run", "worker"]
+    command: ["pnpm", "run", "worker"]
+    working_dir: /app/packages/api
 
   # File Cleanup Service (optional)
   file-cleanup:
     build:
-      context: ../packages/api
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: packages/api/Dockerfile
+      target: development
     container_name: formgrid-file-cleanup
     restart: unless-stopped
     volumes:
-      - uploads_data:/app/uploads
+      - uploads_data:/app/packages/api/uploads
     environment:
       - NODE_ENV=development
       - DATABASE_URL=mysql://app_user:app_password@db:3306/formgrid
@@ -182,7 +192,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: ["npm", "run", "cleanup"]
+    command: ["pnpm", "run", "cleanup"]
+    working_dir: /app/packages/api
     profiles:
       - maintenance
 
