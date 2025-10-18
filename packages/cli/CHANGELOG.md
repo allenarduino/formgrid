@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0] - 2025-10-18
+
+### Changed
+- Updated for FormGrid v2.0 with simplified authentication
+- Removed Google OAuth configuration requirements
+- Email configuration now optional (only needed for password reset)
+- Simplified setup process - no OAuth credentials needed
+
+### Breaking Changes
+- Users upgrading from 1.0.x need to run database migration
+- See project README for migration instructions
+
 ## [1.0.3] - 2025-10-11
 
 ### Added
