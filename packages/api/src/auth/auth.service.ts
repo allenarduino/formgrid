@@ -176,4 +176,26 @@ export class AuthService {
             email: updatedUser.email,
         };
     }
+
+    /**
+     * Verify user email using verification token
+     * @param verificationToken - The email verification token
+     * @returns Promise<{ id: string; email: string }> - User info
+     * @throws Error if token is invalid or expired
+     */
+    async verifyEmail(verificationToken: string): Promise<{ id: string; email: string }> {
+        // Find user by verification token
+        const user = await this.authRepo.findByVerificationToken(verificationToken);
+        if (!user) {
+            throw new Error('Invalid or expired verification token');
+        }
+
+        // Verify email and clear token
+        const verifiedUser = await this.authRepo.verifyUserEmail(user.id);
+
+        return {
+            id: verifiedUser.id,
+            email: verifiedUser.email,
+        };
+    }
 }

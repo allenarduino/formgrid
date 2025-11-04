@@ -13,11 +13,13 @@ export function createAuthRoutes(authController?: AuthController): Router {
     const signUp = controller.signUp.bind(controller);
     const login = controller.login.bind(controller);
     const verifyToken = controller.verifyToken.bind(controller);
+    const verifyEmail = controller.verifyEmail.bind(controller);
     const forgotPassword = controller.forgotPassword.bind(controller);
     const resetPassword = controller.resetPassword.bind(controller);
     const getMe = controller.getMe.bind(controller);
 
     // Public routes
+    router.get('/verify', verifyEmail);
     router.post('/signup', signUp);
     router.post('/login', login);
     router.post('/verify-token', verifyToken);

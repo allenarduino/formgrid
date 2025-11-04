@@ -4,6 +4,7 @@ import { AuthRepository } from './auth.repository';
 import { UserRepository } from '../user/user.repository';
 import { createEmailProvider } from '../infrastructure/email';
 import { signupSchema, loginSchema, passwordResetRequestSchema, passwordResetSchema } from './auth.validation';
+import { env } from '../config/env';
 
 /**
  * Authentication controller for handling HTTP requests
@@ -254,5 +255,102 @@ export class AuthController {
                 message: (error as Error).message,
             });
         }
+    }
+
+    /**
+     * GET /api/auth/verify
+     * Verify email using verification token - returns HTML page
+     */
+    async verifyEmail(req: Request, res: Response): Promise<void> {
+        try {
+            const { token } = req.query;
+
+            if (!token || typeof token !== 'string') {
+                res.status(400).send(this.getErrorPage('Verification token is required'));
+                return;
+            }
+
+            const user = await this.authService.verifyEmail(token);
+
+            // Return success HTML page
+            res.status(200).send(this.getSuccessPage(user.email));
+        } catch (error) {
+            // Return error HTML page
+            res.status(400).send(this.getErrorPage((error as Error).message));
+        }
+    }
+
+    /**
+     * Get success HTML page for email verification
+     */
+    private getSuccessPage(email: string): string {
+        const loginUrl = `${env.APP_URL}/login`;
+        return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verified Successfully</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center">
+    <div class="max-w-md w-full bg-white rounded-lg shadow-md p-8 text-center">
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+        </div>
+        <h1 class="text-2xl font-bold text-gray-900 mb-2">Email Verified!</h1>
+        <p class="text-gray-600 mb-4">Your email address <strong>${email}</strong> has been successfully verified.</p>
+        <p class="text-gray-600 mb-6">You can now log in to your account.</p>
+        <a href="${loginUrl}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition duration-200">
+            Go to Login
+        </a>
+    </div>
+</body>
+</html>
+        `;
+    }
+
+    /**
+     * Get error HTML page for email verification
+     */
+    private getErrorPage(errorMessage: string): string {
+        const loginUrl = `${env.APP_URL}/login`;
+        // Escape HTML in error message to prevent XSS
+        const safeErrorMessage = errorMessage
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+
+        return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification Failed</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center">
+    <div class="max-w-md w-full bg-white rounded-lg shadow-md p-8 text-center">
+        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </div>
+        <h1 class="text-2xl font-bold text-gray-900 mb-2">Verification Failed</h1>
+        <p class="text-gray-600 mb-4">${safeErrorMessage}</p>
+        <p class="text-gray-600 mb-6">The verification link may be invalid or expired. Please request a new verification email.</p>
+        <a href="${loginUrl}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition duration-200">
+            Go to Login
+        </a>
+    </div>
+</body>
+</html>
+        `;
     }
 }

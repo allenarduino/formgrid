@@ -132,4 +132,36 @@ export class AuthRepository {
             },
         });
     }
+
+    /**
+     * Find user by verification token
+     * @param verificationToken - The verification token to search for
+     * @returns Promise<User | null> - The user if found and token is valid, null otherwise
+     */
+    async findByVerificationToken(verificationToken: string): Promise<User | null> {
+        return this.prisma.user.findFirst({
+            where: {
+                verificationToken: verificationToken,
+                verificationTokenExpires: {
+                    gt: new Date(), // Token must not be expired
+                },
+            },
+        });
+    }
+
+    /**
+     * Verify user email and clear verification token
+     * @param userId - The user ID to verify
+     * @returns Promise<User> - The updated user
+     */
+    async verifyUserEmail(userId: string): Promise<User> {
+        return this.prisma.user.update({
+            where: { id: userId },
+            data: {
+                isEmailVerified: true,
+                verificationToken: null,
+                verificationTokenExpires: null,
+            },
+        });
+    }
 }
