@@ -1,0 +1,47 @@
+:root {
+  --paper: #f3eee4;
+  --ink: #1a1814;
+  --ink-soft: #5c564c;
+  --rule: #d4cdbf;
+  --field: #e7e0d3;
+  --marram: #6e7a4a;
+  --oxide: #9c4b2d;
+  --oxide-hover: #7e3c24;
+  --photo-scrim: rgba(26, 24, 20, 0.38);
+  --focus: #9c4b2d;
+
+  --font-display: var(--font-newsreader), 'Times New Roman', serif;
+  --font-sans: var(--font-public-sans), system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2.5rem;
+  --space-5: 4rem;
+  --space-6: 6rem;
+  --space-7: 8rem;
+
+  --page: 77.5rem;
+  --measure: 42.5rem;
+  --gutter: 3rem;
+  --header: 4.25rem;
+  --radius: 2px;
+  --rule-w: 1px;
+  --ease: 180ms ease-out;
+}
+
+@media (max-width: 900px) {
+  :root {
+    --gutter: 1.5rem;
+    --space-6: 4rem;
+    --space-7: 5rem;
+  }
+}
+
+@media (max-width: 600px) {
+  :root {
+    --gutter: 1.25rem;
+    --header: 3.75rem;
+  }
+}

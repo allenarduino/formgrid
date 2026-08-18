@@ -5,6 +5,8 @@ node_modules/
 # Build outputs
 dist/
 build/
+.next/
+out/
 *.tsbuildinfo
 
 # Environment variables
@@ -52,3 +54,5 @@ packages/api/uploads-dev/
 *.pid
 *.seed
 *.pid.lock
+__pycache__/
+*.pyc

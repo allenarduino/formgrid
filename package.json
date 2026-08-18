@@ -16,6 +16,7 @@
     "dashboard:build": "pnpm --filter @formgrid/dashboard run build",
     "cli:dev": "pnpm --filter @formgrid/cli run dev",
     "cli:build": "pnpm --filter @formgrid/cli run build",
+    "example:travel": "pnpm --filter @formgrid/example-travel-agency run dev",
     "formgrid": "node packages/cli/dist/index.js",
     "docker:up": "docker compose -f docker/docker-compose.yml up --build",
     "docker:down": "docker compose -f docker/docker-compose.yml down",

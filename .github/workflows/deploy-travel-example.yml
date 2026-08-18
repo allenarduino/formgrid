@@ -1,0 +1,51 @@
+name: Deploy travel example
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'examples/travel-agency/**'
+      - '.github/workflows/deploy-travel-example.yml'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @formgrid/example-travel-agency run build
+        env:
+          NEXT_PUBLIC_BASE_PATH: /formgrid
+          NEXT_PUBLIC_SITE_URL: https://allenarduino.github.io/formgrid
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: examples/travel-agency/out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
