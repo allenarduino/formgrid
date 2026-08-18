@@ -1,9 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
-import { env } from '../config/env';
+import { DEFAULT_FORM_RATE_LIMIT_PER_MINUTE } from '../form/spamProtectionDefaults';
+
+const FORM_SUBMISSION_WINDOW_MS = 60 * 1000;
 
 /**
  * Simple in-memory rate limiting middleware
- * In production, this should use Redis for distributed rate limiting
+ * In production with multiple API instances, use Redis (see enhancedRateLimit.ts)
  */
 class RateLimiter {
     private requests: Map<string, { count: number; resetTime: number }> = new Map();
@@ -14,6 +16,7 @@ class RateLimiter {
         this.cleanupInterval = setInterval(() => {
             this.cleanup();
         }, 60000);
+        this.cleanupInterval.unref();
     }
 
     private cleanup(): void {
@@ -57,6 +60,10 @@ class RateLimiter {
     getResetTime(key: string): number {
         const data = this.requests.get(key);
         return data ? data.resetTime : Date.now();
+    }
+
+    clear(): void {
+        this.requests.clear();
     }
 
     destroy(): void {
@@ -136,15 +143,34 @@ export function createRateLimit(options: {
  * More restrictive for form submissions
  */
 export const formSubmissionRateLimit = createRateLimit({
-    windowMs: 60 * 1000, // 1 minute
-    max: 10, // 10 submissions per minute per IP
+    windowMs: FORM_SUBMISSION_WINDOW_MS,
+    max: 10, // global cap: 10 submissions per minute per IP + User-Agent
     keyGenerator: (req: Request) => {
-        // Use IP + User-Agent for more granular rate limiting
         const ip = req.ip || 'unknown';
         const userAgent = req.get('User-Agent') || 'unknown';
         return `${ip}:${userAgent}`;
     },
 });
+
+/**
+ * Per-form submission limit (form.settings.spamProtection.rateLimit).
+ * Keyed as form:{formId}:ip:{clientIp}, 60-second window.
+ * Returns true if the request is allowed.
+ */
+export function checkFormSubmissionRateLimit(
+    formId: string,
+    ip: string,
+    maxPerMinute: number
+): boolean {
+    const limit = maxPerMinute > 0 ? maxPerMinute : DEFAULT_FORM_RATE_LIMIT_PER_MINUTE;
+    const key = `form:${formId}:ip:${ip}`;
+    return rateLimiter.isAllowed(key, limit, FORM_SUBMISSION_WINDOW_MS);
+}
+
+/** Test helper: clear in-memory counters. */
+export function resetFormSubmissionRateLimits(): void {
+    rateLimiter.clear();
+}
 
 /**
  * API rate limiting for authenticated endpoints

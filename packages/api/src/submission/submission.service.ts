@@ -272,22 +272,16 @@ export class SubmissionService {
             // Add secret key for Google reCAPTCHA verification
             ...(process.env.RECAPTCHA_SECRET_KEY && { recaptchaSecret: process.env.RECAPTCHA_SECRET_KEY }),
 
-            // Rate limiting: Use user-configured rate limit from dashboard
-            rateLimitPerIp: spamProtection.rateLimit || 10, // submissions per minute per IP
-
-            // Default form limits
-            rateLimitPerForm: 50, // submissions per form per hour
-            rateLimitWindow: 60,  // time window in minutes
+            // Per-form rate limits are enforced in submission.controller.ts
+            // (checkFormSubmissionRateLimit) so this path only handles honeypot + CAPTCHA.
         };
 
         console.log('Spam protection config:', {
             honeypot: spamProtection.honeypot,
             captcha: spamConfig.enableRecaptcha,
-            rateLimit: spamConfig.rateLimitPerIp
         });
 
-        // Perform comprehensive spam check
-        // This will check honeypot, CAPTCHA, and rate limiting
+        // Perform honeypot + CAPTCHA checks (rate limits are enforced in the controller)
         const spamCheck = await this.spamProtectionService.performSpamCheck(
             data.formData, // Contains all form fields including 'g-recaptcha-response'
             ip,            // Client IP for rate limiting and CAPTCHA verification

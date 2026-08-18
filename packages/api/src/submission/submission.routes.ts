@@ -2,7 +2,6 @@ import { Router } from 'express';
 import { SubmissionController } from './submission.controller';
 import { authMiddleware } from '../presentation/middleware/auth';
 import { formSubmissionRateLimit, apiRateLimit } from '../middleware/rateLimit';
-import { rateLimiters } from '../middleware/enhancedRateLimit';
 import { handleFileUpload } from '../middleware/fileUpload';
 
 /**
@@ -23,12 +22,11 @@ export function createSubmissionRoutes(submissionController?: SubmissionControll
     const markSubmissionsAsSpam = controller.markSubmissionsAsSpam.bind(controller);
 
     // Public routes (no authentication required)
-    // Apply both basic and enhanced rate limiting
+    // Global 10/min per IP+UA; per-form limit is enforced in submitToForm
 
     // Formspree-style URL: /f/:endpointSlug
     router.post('/f/:endpointSlug',
         formSubmissionRateLimit,
-        rateLimiters.formSpecific.middleware(),
         handleFileUpload,
         submitToForm
     );
@@ -36,7 +34,6 @@ export function createSubmissionRoutes(submissionController?: SubmissionControll
     // API-prefixed Formspree-style URL: /api/f/:endpointSlug
     router.post('/api/f/:endpointSlug',
         formSubmissionRateLimit,
-        rateLimiters.formSpecific.middleware(),
         handleFileUpload,
         submitToForm
     );
@@ -44,7 +41,6 @@ export function createSubmissionRoutes(submissionController?: SubmissionControll
     // Original API-style URL: /forms/:endpointSlug/submit
     router.post('/forms/:endpointSlug/submit',
         formSubmissionRateLimit,
-        rateLimiters.formSpecific.middleware(),
         handleFileUpload,
         submitToForm
     );

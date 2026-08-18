@@ -2,8 +2,10 @@ import { Request, Response } from 'express';
 import { SubmissionService } from './submission.service';
 import { SubmissionRepository } from './submission.repository';
 import { FormRepository } from '../form/form.repository';
-import { createSubmissionSchema, submissionQuerySchema } from './submission.validation';
+import { createSubmissionSchema, FormSettings, submissionQuerySchema } from './submission.validation';
 import { getFileUrl } from '../middleware/fileUpload';
+import { checkFormSubmissionRateLimit } from '../middleware/rateLimit';
+import { resolveSpamProtectionSettings } from '../form/spamProtectionDefaults';
 
 /**
  * Submission controller for handling HTTP requests
@@ -35,6 +37,26 @@ export class SubmissionController {
                     success: false,
                     message: 'Form endpoint slug is required',
                 });
+                return;
+            }
+
+            const formRepo = new FormRepository();
+            const form = await formRepo.findByEndpointSlug(endpointSlug);
+            if (!form) {
+                throw new Error('Form not found');
+            }
+            if (!form.isActive) {
+                throw new Error('Form is not active');
+            }
+
+            const clientIp = req.ip || req.connection.remoteAddress || 'unknown';
+            const spamProtection = resolveSpamProtectionSettings(
+                (form.settings as FormSettings | null)?.spamProtection
+            );
+
+            // Per-form limit (Security tab). Silent 200 so bots are not told they were blocked.
+            if (!checkFormSubmissionRateLimit(form.id, clientIp, spamProtection.rateLimit)) {
+                this.respondWithSilentRateLimit(req, res, form.settings as FormSettings | null);
                 return;
             }
 
@@ -109,7 +131,7 @@ export class SubmissionController {
             }
 
             // Get client IP and User-Agent
-            const ip = req.ip || req.connection.remoteAddress || 'unknown';
+            const ip = clientIp;
             const userAgent = req.get('User-Agent') || 'unknown';
             const submission = await this.submissionService.submitToForm(
                 endpointSlug,
@@ -515,6 +537,24 @@ export class SubmissionController {
                 error: (error as Error).message,
             });
         }
+    }
+
+    /**
+     * Drop a rate-limited submit without persisting it.
+     * JSON clients get a success payload; HTML forms are redirected to the success URL.
+     */
+    private respondWithSilentRateLimit(req: Request, res: Response, settings: FormSettings | null): void {
+        const contentType = req.get('Content-Type') || '';
+        const isHtmlForm = contentType.includes('application/x-www-form-urlencoded') ||
+            contentType.includes('multipart/form-data');
+
+        if (isHtmlForm) {
+            const redirectUrl = settings?.redirectUrl || 'http://localhost:5173/success.html';
+            res.redirect(redirectUrl);
+            return;
+        }
+
+        res.status(200).json({ success: true, message: 'Submission received' });
     }
 
     /**

@@ -30,7 +30,7 @@
 - **Universal Integration** - Works with any frontend framework or static site
 - **Webhook Support** - Real-time notifications for new submissions
 - **RESTful API** - Standard HTTP methods for form submissions
-- **Rate Limiting** - Built-in protection against spam and abuse
+- **Rate Limiting** - Global 10 submissions/min per IP, plus a per-form limit you set in Form Details → Security (default 10/min; use 2–3 for contact forms)
 
 ### Authentication & Security
 - **JWT Authentication** - Secure token-based authentication
@@ -339,6 +339,17 @@ form.addEventListener('submit', async (e) => {
 });
 ```
 
+## Rate Limiting
+
+Public form submits are protected by two layers:
+
+1. **Global cap** — 10 POSTs per minute per IP + User-Agent on `/api/f/:slug`, `/f/:slug`, and `/forms/:slug/submit`.
+2. **Per-form cap** — `form.settings.spamProtection.rateLimit` (default **10** submissions per minute per IP per form). Set this in **Form Details → Security**. Contact forms usually work well at **2–3**.
+
+Rate limiting cuts burst spam. It does not replace CAPTCHA for bots that POST directly to the API. Limits apply to every form, not per customer plan.
+
+The in-memory limiter resets on process restart and does not sync across multiple API instances. A single Docker deploy is fine. For horizontal scale, configure Redis (`REDIS_HOST`, `REDIS_PORT`, optional `REDIS_PASSWORD` / `REDIS_DB`) and use the Redis-backed limiter in `packages/api/src/middleware/enhancedRateLimit.ts`.
+
 ## Environment Variables
 
 ### Required
@@ -373,6 +384,12 @@ AWS_S3_BUCKET=your-bucket-name
 # Spam Protection (optional)
 RECAPTCHA_SECRET_KEY=your-recaptcha-secret-key
 RECAPTCHA_SITE_KEY=your-recaptcha-site-key
+
+# Redis (optional — required for multi-instance rate limiting)
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_DB=0
+# REDIS_PASSWORD=
 ```
 
 ## Development

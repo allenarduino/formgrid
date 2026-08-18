@@ -271,14 +271,15 @@ export class SpamProtectionService {
             console.log('Form rate limit check passed');
         }
 
-        // Check IP + Form combination (most restrictive)
-        const ipFormLimit = Math.min(config.rateLimitPerIp || 10, config.rateLimitPerForm || 50) || 5;
-        console.log(`Checking IP+Form rate limit: ${ipFormLimit} per ${config.rateLimitWindow} minutes`);
-        if (!this.checkRateLimitByIpAndForm(ip, formId, ipFormLimit, config.rateLimitWindow)) {
-            console.log('IP+Form rate limit exceeded');
-            return { isValid: false, reason: 'IP + Form rate limit exceeded' };
+        if (config.rateLimitPerIp || config.rateLimitPerForm) {
+            const ipFormLimit = Math.min(config.rateLimitPerIp || 10, config.rateLimitPerForm || 50) || 5;
+            console.log(`Checking IP+Form rate limit: ${ipFormLimit} per ${config.rateLimitWindow} minutes`);
+            if (!this.checkRateLimitByIpAndForm(ip, formId, ipFormLimit, config.rateLimitWindow)) {
+                console.log('IP+Form rate limit exceeded');
+                return { isValid: false, reason: 'IP + Form rate limit exceeded' };
+            }
+            console.log('IP+Form rate limit check passed');
         }
-        console.log('IP+Form rate limit check passed');
 
         // 3. reCAPTCHA VERIFICATION - The main CAPTCHA check
         if (config.enableRecaptcha && config.recaptchaSecret) {
