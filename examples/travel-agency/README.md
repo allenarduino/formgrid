@@ -79,12 +79,12 @@ Without the endpoint, the form waits 700ms and returns a local reference id. Not
 
 ## GitHub Pages
 
-A workflow at `.github/workflows/deploy-travel-example.yml` builds this example and deploys `out/` to GitHub Pages.
+A workflow at `.github/workflows/deploy-travel-example.yml` builds this example and Ulíng, then deploys both to GitHub Pages. Marram sits at the site root.
 
 1. In the GitHub repo: Settings → Pages → Source: GitHub Actions
 2. Push to `main` (or run the workflow from the Actions tab)
 
-The preview is [https://allenarduino.github.io/formgrid/](https://allenarduino.github.io/formgrid/). The workflow sets `NEXT_PUBLIC_BASE_PATH=/formgrid` so assets resolve under that project URL.
+The preview is [https://allenarduino.github.io/formgrid/](https://allenarduino.github.io/formgrid/). The workflow sets `NEXT_PUBLIC_BASE_PATH=/formgrid` so assets resolve under that project URL. Ulíng is at [https://allenarduino.github.io/formgrid/uling/](https://allenarduino.github.io/formgrid/uling/).
 
 ## Stack
 

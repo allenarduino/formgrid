@@ -1,10 +1,11 @@
-name: Deploy travel example
+name: Deploy examples
 
 on:
   push:
     branches: [main]
     paths:
       - 'examples/travel-agency/**'
+      - 'examples/restaurant/**'
       - '.github/workflows/deploy-travel-example.yml'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
@@ -32,13 +33,24 @@ jobs:
           node-version: 20
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @formgrid/example-travel-agency run build
+      - name: Build Marram
+        run: pnpm --filter @formgrid/example-travel-agency run build
         env:
           NEXT_PUBLIC_BASE_PATH: /formgrid
           NEXT_PUBLIC_SITE_URL: https://allenarduino.github.io/formgrid
+      - name: Build Ulíng
+        run: pnpm --filter @formgrid/example-restaurant run build
+        env:
+          NEXT_PUBLIC_BASE_PATH: /formgrid/uling
+          NEXT_PUBLIC_SITE_URL: https://allenarduino.github.io/formgrid/uling
+      - name: Assemble Pages site
+        run: |
+          mkdir -p site/uling
+          cp -R examples/travel-agency/out/. site/
+          cp -R examples/restaurant/out/. site/uling/
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: examples/travel-agency/out
+          path: site
 
   deploy:
     needs: build

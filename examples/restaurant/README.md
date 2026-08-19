@@ -4,7 +4,7 @@ A fictional Manila charcoal kitchen in Deptford, used to show a restaurant websi
 
 This is not a dashboard demo. A visitor should see a kitchen. A developer can later point the reservation form at a live Formgrid endpoint.
 
-[Examples index](../)
+[Live preview](https://allenarduino.github.io/formgrid/uling/) · [Examples index](../)
 
 ![Ulíng home](./screenshots/home.png)
 
@@ -101,6 +101,15 @@ NEXT_PUBLIC_FORMGRID_ENDPOINT=https://your-instance/api/f/uling-tables
 Optional: `NEXT_PUBLIC_SITE_URL` for canonical URLs and the sitemap (defaults to `http://localhost:5175`).
 
 Without the endpoint, the form waits 700ms and returns a local reference id. Nothing is stored on a server.
+
+## GitHub Pages
+
+A workflow at `.github/workflows/deploy-travel-example.yml` builds this example next to Marram and deploys both to GitHub Pages.
+
+1. In the GitHub repo: Settings → Pages → Source: GitHub Actions
+2. Push to `main` (or run the workflow from the Actions tab)
+
+The preview is [https://allenarduino.github.io/formgrid/uling/](https://allenarduino.github.io/formgrid/uling/). The workflow sets `NEXT_PUBLIC_BASE_PATH=/formgrid/uling` so assets resolve under that project URL.
 
 ## Stack
 
