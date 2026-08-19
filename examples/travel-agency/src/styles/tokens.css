@@ -28,12 +28,14 @@
   --header: 4.25rem;
   --radius: 2px;
   --rule-w: 1px;
-  --ease: 180ms ease-out;
+  --ease: 220ms ease-out;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-shutter: cubic-bezier(0.76, 0, 0.24, 1);
 }
 
 @media (max-width: 900px) {
   :root {
-    --gutter: 1.5rem;
+    --gutter: 1.75rem;
     --space-6: 4rem;
     --space-7: 5rem;
   }
@@ -41,7 +43,7 @@
 
 @media (max-width: 600px) {
   :root {
-    --gutter: 1.25rem;
+    --gutter: 1.5rem;
     --header: 3.75rem;
   }
 }

@@ -182,7 +182,7 @@ export function BookingForm({ destinations, tours }: Props) {
           ))}
         </select>
       </label>
-      <label>
+      <label className="form-span">
         Notes
         <textarea
           name="notes"
@@ -191,11 +191,11 @@ export function BookingForm({ destinations, tours }: Props) {
         />
       </label>
       {error ? (
-        <p className="form-error" role="alert">
+        <p className="form-error form-span" role="alert">
           {error}
         </p>
       ) : null}
-      <button className="btn" type="submit" disabled={sending}>
+      <button className="btn form-span" type="submit" disabled={sending}>
         {sending ? 'Sending' : 'Send the note'}
       </button>
     </form>

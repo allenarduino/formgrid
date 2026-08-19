@@ -9,7 +9,7 @@ export function DestinationMosaic({ destinations }: { destinations: Destination[
     <div className="mosaic">
       {destinations.map((destination, index) => (
         <Link key={destination.id} className="mosaic-item" href={`/destinations/${destination.slug}`}>
-          <Photo image={destination.hero} frame={frames[index] ?? 'mosaic-mid'} />
+          <Photo image={destination.hero} frame={frames[index] ?? 'mosaic-mid'} delay={index * 70} />
           <p className="kicker">
             {destination.country} · {destination.region}
           </p>

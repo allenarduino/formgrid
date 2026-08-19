@@ -10,7 +10,7 @@ export function TourMosaic({ tours }: { tours: TourWithDestination[] }) {
     <div className="mosaic">
       {tours.map((tour, index) => (
         <Link key={tour.id} className="mosaic-item" href={`/tours/${tour.slug}`}>
-          <Photo image={tour.hero} frame={frames[index] ?? 'mosaic-mid'} />
+          <Photo image={tour.hero} frame={frames[index] ?? 'mosaic-mid'} delay={index * 70} />
           <p className="kicker">
             {tour.destination.name} · {tour.durationDays} days
           </p>

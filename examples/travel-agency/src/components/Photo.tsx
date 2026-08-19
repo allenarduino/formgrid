@@ -1,3 +1,6 @@
+'use client'
+
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import type { ImageAsset } from '@/data/types'
 
@@ -20,12 +23,40 @@ type Props = {
   frame: Frame
   priority?: boolean
   zoom?: boolean
+  delay?: number
 }
 
-export function Photo({ image, frame, priority, zoom = true }: Props) {
+export function Photo({ image, frame, priority, zoom = true, delay = 0 }: Props) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [inView, setInView] = useState(false)
+  const fullBleed = frame === 'hero' || frame === 'detail'
+
+  useEffect(() => {
+    const node = ref.current
+    if (!node) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setInView(true)
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.18, rootMargin: '0px 0px -8% 0px' }
+    )
+
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [])
+
   return (
-    <div className={`img-frame img-frame-${frame} ${zoom ? 'img-zoom' : ''}`}>
+    <div
+      ref={ref}
+      className={`img-frame img-frame-${frame} ${zoom ? 'img-zoom' : ''} ${inView ? 'is-in' : ''} ${fullBleed ? 'img-frame-bleed' : ''}`}
+      style={{ '--reveal-delay': `${delay}ms` } as React.CSSProperties}
+    >
       <Image
+        className="img-frame-media"
         src={image.src}
         alt={image.alt}
         fill
@@ -33,6 +64,8 @@ export function Photo({ image, frame, priority, zoom = true }: Props) {
         priority={priority}
         style={{ objectFit: 'cover' }}
       />
+      {fullBleed ? null : <span className="img-frame-shutter" aria-hidden />}
+      <span className="img-frame-tick" aria-hidden />
     </div>
   )
 }

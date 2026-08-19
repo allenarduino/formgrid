@@ -18,6 +18,7 @@ function isActive(pathname: string, href: string) {
 export function Header() {
   const pathname = usePathname() ?? ''
   const [open, setOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
     setOpen(false)
@@ -30,8 +31,15 @@ export function Header() {
     }
   }, [open])
 
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   return (
-    <header className="site-header">
+    <header className={scrolled ? 'site-header is-scrolled' : 'site-header'}>
       <div className="header-inner">
         <Link href="/" className="wordmark">
           Marram

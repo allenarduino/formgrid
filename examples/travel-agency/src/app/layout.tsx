@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { IBM_Plex_Mono, Newsreader, Public_Sans } from 'next/font/google'
 import { Footer } from '@/components/Footer'
 import { Header } from '@/components/Header'
+import { MotionInit } from '@/components/MotionInit'
 import { site } from '@/lib/site'
 import '@/styles/global.css'
 
@@ -10,6 +11,7 @@ const newsreader = Newsreader({
   variable: '--font-newsreader',
   display: 'swap',
   adjustFontFallback: false,
+  style: ['normal', 'italic'],
 })
 
 const publicSans = Public_Sans({
@@ -40,10 +42,25 @@ export const metadata: Metadata = {
   icons: { icon: '/favicon.svg' },
 }
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover' as const,
+}
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('js-motion')}catch(e){}",
+          }}
+        />
+      </head>
       <body className={`${newsreader.variable} ${publicSans.variable} ${plexMono.variable}`}>
+        <MotionInit />
         <a className="skip-link" href="#main">
           Skip to content
         </a>
