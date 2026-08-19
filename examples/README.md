@@ -47,6 +47,16 @@ A Manila charcoal kitchen in a former Deptford auto shop. The menu is a live Goo
 
 [How to run it](./restaurant)
 
+![Ulíng home](./restaurant/screenshots/home.png)
+
+![Ulíng menu](./restaurant/screenshots/menu.png)
+
+![Ulíng catalog](./restaurant/screenshots/catalog.png)
+
+![Ulíng contact](./restaurant/screenshots/contact.png)
+
+![Ulíng reservations](./restaurant/screenshots/reservations.png)
+
 From the repository root:
 
 ```bash
