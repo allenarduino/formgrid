@@ -5,6 +5,7 @@ Complete websites that use Formgrid as a form backend. Each example is a real ma
 | Example | Preview | Source |
 |---------|---------|--------|
 | [Marram](#marram) | [Live site](https://allenarduino.github.io/formgrid/) | [`travel-agency/`](./travel-agency) |
+| [Ulíng](#uling) | Local (`pnpm example:restaurant`) | [`restaurant/`](./restaurant) |
 
 ## Marram
 
@@ -39,3 +40,20 @@ One-time setup in the GitHub repo:
 The live URL is [https://allenarduino.github.io/formgrid/](https://allenarduino.github.io/formgrid/). You can also run the workflow by hand from the Actions tab.
 
 To send inquiries for real on the preview, set `NEXT_PUBLIC_FORMGRID_ENDPOINT` as a GitHub Actions variable (a public Formgrid form URL). Without it, the form still works and returns a local reference id.
+
+## Ulíng
+
+A Manila charcoal kitchen in a former Deptford auto shop. The menu is a live Google Sheet, shown through the Sheetrocket catalog widget. Tables go through a Formgrid-shaped form. The kitchen is fictional.
+
+[How to run it](./restaurant)
+
+From the repository root:
+
+```bash
+pnpm install
+pnpm example:restaurant
+```
+
+Open [http://localhost:5175](http://localhost:5175).
+
+This example is not on the GitHub Pages site. Pages still publishes Marram only. Run Ulíng locally, or point another host at `examples/restaurant/out` after `pnpm --filter @formgrid/example-restaurant run build`.

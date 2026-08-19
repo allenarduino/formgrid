@@ -1,0 +1,78 @@
+'use client'
+
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
+
+const links = [
+  { href: '/menu', label: 'Menu' },
+  { href: '/about', label: 'The room' },
+  { href: '/contact', label: 'Find us' },
+  { href: '/reservations', label: 'Book a table', cta: true },
+]
+
+function isActive(pathname: string, href: string) {
+  return pathname === href || pathname.startsWith(`${href}/`)
+}
+
+export function Header() {
+  const pathname = usePathname() ?? ''
+  const [open, setOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    setOpen(false)
+  }, [pathname])
+
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : ''
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [open])
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  return (
+    <header className={scrolled ? 'site-header is-scrolled' : 'site-header'}>
+      <div className="header-inner">
+        <Link href="/" className="wordmark">
+          Ulíng
+        </Link>
+        <nav className="nav-desktop" aria-label="Primary">
+          {links.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={link.cta ? 'nav-cta' : undefined}
+              aria-current={isActive(pathname, link.href) ? 'page' : undefined}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+        <button
+          type="button"
+          className="menu-toggle"
+          aria-expanded={open}
+          aria-controls="mobile-nav"
+          onClick={() => setOpen((value) => !value)}
+        >
+          {open ? 'Close' : 'Menu'}
+        </button>
+      </div>
+      <nav id="mobile-nav" className={open ? 'nav-panel open' : 'nav-panel'} aria-label="Mobile">
+        {links.map((link) => (
+          <Link key={link.href} href={link.href} aria-current={isActive(pathname, link.href) ? 'page' : undefined}>
+            {link.label}
+          </Link>
+        ))}
+      </nav>
+    </header>
+  )
+}

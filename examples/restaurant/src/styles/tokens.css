@@ -1,0 +1,51 @@
+:root {
+  --soot: #161412;
+  --bone: #e8e6df;
+  --ash: #2c2925;
+  --vinegar: #c45c4a;
+  --vinegar-hover: #a94c3d;
+  --leaf: #3f5c3a;
+  --leaf-bright: #8fa887;
+  --zinc: #8a8680;
+  --ink-soft: #5c5852;
+  --field: #ddd9d0;
+  --photo-scrim: rgba(22, 20, 18, 0.42);
+  --focus: #c45c4a;
+
+  --font-display: var(--font-syne), 'Arial Narrow', sans-serif;
+  --font-serif: var(--font-source-serif), 'Georgia', serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2.5rem;
+  --space-5: 4rem;
+  --space-6: 6rem;
+  --space-7: 8rem;
+
+  --page: 77.5rem;
+  --measure: 42.5rem;
+  --gutter: 3rem;
+  --header: 4.25rem;
+  --radius: 2px;
+  --rule-w: 1px;
+  --ease: 220ms ease-out;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-shutter: cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+@media (max-width: 900px) {
+  :root {
+    --gutter: 1.75rem;
+    --space-6: 4rem;
+    --space-7: 5rem;
+  }
+}
+
+@media (max-width: 600px) {
+  :root {
+    --gutter: 1.5rem;
+    --header: 3.75rem;
+  }
+}
