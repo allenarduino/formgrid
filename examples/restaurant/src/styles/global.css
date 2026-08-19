@@ -651,7 +651,6 @@ html.js-motion .img-frame:not(.img-frame-bleed).is-in .img-frame-tick {
   gap: var(--space-4);
   align-items: end;
   padding-bottom: var(--space-4);
-  border-bottom: var(--rule-w) solid var(--zinc);
 }
 
 .menu-board-slot,
